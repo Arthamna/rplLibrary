@@ -20,10 +20,13 @@ type (
 		GetAll(ctx context.Context) ([]dtos.BookResponse, error)
 		FindByStatus(ctx context.Context, status string) ([]dtos.BookResponse, error)
 		FindByCategory(ctx context.Context, category string) ([]dtos.BookResponse, error)
+		SearchByTitle(ctx context.Context, query string) ([]dtos.BookResponse, error)
 		GetByID(ctx context.Context, bookID string) (dtos.BookResponse, error)
 		Update(ctx context.Context, req dtos.BookUpdateRequest) (dtos.BookResponse, error)
 		Delete(ctx context.Context, bookID string) error
-		BorrowBook(ctx context.Context, req dtos.BorrowBookRequest) (dtos.BorrowBookResponse, error)
+		BorrowBook(ctx context.Context, req dtos.BorrowBookRequest, userId string) (dtos.BorrowBookResponse, error)
+		BorrowMultipleBook(ctx context.Context, req dtos.BorrowMultipleBookRequest, userId string) (dtos.BorrowMultipleBookResponse, error)
+		SetMultipleBookReturned(ctx context.Context, req dtos.SetMultipleReturnedRequest) (dtos.SetMultipleReturnedResponse, error)
 		SetBookReturned(ctx context.Context, bookID string) (dtos.SetBookReturnedResponse, error)
 	}
 
@@ -110,7 +113,7 @@ func (s *bookService) UploadBookPicture(ctx context.Context, req dtos.UploadBook
 	book.BookPicture = imageBytes
 	book.UpdatedAt = time.Now()
 
-	updatedBook, err := s.bookRepo.Update(ctx, nil, book)
+	updatedBook, err := s.bookRepo.UpdatePicture(ctx, nil, book)
 	if err != nil {
 		return dtos.UploadBookPictureResponse{}, err
 	}
@@ -146,6 +149,38 @@ func (s *bookService) GetAll(ctx context.Context) ([]dtos.BookResponse, error) {
 	}
 
 	return response, nil
+}
+
+func (s *bookService) SearchByTitle(ctx context.Context, query string) ([]dtos.BookResponse, error) {
+    if query == "" {
+        return nil, errors.New("search query cannot be empty")
+    }
+
+    books, err := s.bookRepo.FindByTitle(ctx, query)
+    if err != nil {
+        return nil, err
+    }
+
+    var response []dtos.BookResponse
+    for _, book := range books {
+        book := book
+        var categoryIDs []string
+        for _, category := range book.Categories {
+            categoryIDs = append(categoryIDs, category.CategoryID)
+        }
+        response = append(response, dtos.BookResponse{
+            BookID:      book.BookID,
+            Author:      book.Author,
+            Title:       book.Title,
+            Description: book.Description,
+            Status:      book.Status,
+            CategoryIDs: categoryIDs,
+            CreatedAt:   book.CreatedAt,
+            UpdatedAt:   book.UpdatedAt,
+        })
+    }
+
+    return response, nil
 }
 
 func (s *bookService) FindByStatus(ctx context.Context, status string) ([]dtos.BookResponse, error) {
@@ -264,21 +299,37 @@ func (s *bookService) Update(ctx context.Context, req dtos.BookUpdateRequest) (d
 		}
 	}
 
+	// reassign ke categories 
+	updatedBook, err = s.bookRepo.FindByID(ctx, updatedBook.BookID)
+	if err != nil {
+		return dtos.BookResponse{}, err
+	}
+
+	var categoryIDs []string
+	for _, c := range updatedBook.Categories {
+		categoryIDs = append(categoryIDs, c.CategoryID)
+	}
+
 	return dtos.BookResponse{
 		BookID:      updatedBook.BookID,
 		Author:      updatedBook.Author,
 		Title:       updatedBook.Title,
 		Description: updatedBook.Description,
 		Status:      updatedBook.Status,
-		CategoryIDs: req.CategoryIDs,
+		CategoryIDs: categoryIDs,
 		CreatedAt:   updatedBook.CreatedAt,
 		UpdatedAt:   updatedBook.UpdatedAt,
 	}, nil
 }
 
-func (s *bookService) BorrowBook(ctx context.Context, req dtos.BorrowBookRequest) (dtos.BorrowBookResponse, error) {
+func (s *bookService) BorrowBook(ctx context.Context, req dtos.BorrowBookRequest, userId string) (dtos.BorrowBookResponse, error) {
 	mu.Lock()
 	defer mu.Unlock()
+
+	user, err := s.userRepo.FindByID(ctx, userId)
+	if err != nil {
+		return dtos.BorrowBookResponse{}, err
+	}
 
 	book, err := s.bookRepo.FindByID(ctx, req.BookID)
 	if err != nil {
@@ -287,11 +338,6 @@ func (s *bookService) BorrowBook(ctx context.Context, req dtos.BorrowBookRequest
 
 	if book.Status == constants.STATUS_BORROWED {
 		return dtos.BorrowBookResponse{}, errors.New("book is already borrowed")
-	}
-
-	user, err := s.userRepo.FindByID(ctx, req.UserID)
-	if err != nil {
-		return dtos.BorrowBookResponse{}, err
 	}
 
 	now := time.Now()
@@ -323,6 +369,58 @@ func (s *bookService) BorrowBook(ctx context.Context, req dtos.BorrowBookRequest
 		BorrowedAt: createdBorrowing.BorrowedAt,
 	}, nil
 }
+
+func (s *bookService) BorrowMultipleBook(ctx context.Context, req dtos.BorrowMultipleBookRequest, userId string) (dtos.BorrowMultipleBookResponse, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	user, err := s.userRepo.FindByID(ctx, userId)
+	if err != nil {
+		return dtos.BorrowMultipleBookResponse{}, err
+	}
+
+	var results []dtos.BorrowBookResponse
+	now := time.Now()
+
+	for _, bookID := range req.BookIDs {
+		book, err := s.bookRepo.FindByID(ctx, bookID)
+		if err != nil {
+			return dtos.BorrowMultipleBookResponse{}, errors.New("book not found: " + bookID)
+		}
+		if book.Status == constants.STATUS_BORROWED {
+			return dtos.BorrowMultipleBookResponse{}, errors.New("book already borrowed: " + bookID)
+		}
+
+		borrowing := &models.BookBorrowing{
+			BorrowingID: uuid.NewString(),
+			UserID:      user.UserID,
+			BookID:      book.BookID,
+			BorrowedAt:  now,
+		}
+		createdBorrowing, err := s.borrowingRepo.Create(ctx, nil, borrowing)
+		if err != nil {
+			return dtos.BorrowMultipleBookResponse{}, err
+		}
+
+		book.Status = constants.STATUS_BORROWED
+		book.UpdatedAt = now
+		updatedBook, err := s.bookRepo.Update(ctx, nil, book)
+		if err != nil {
+			return dtos.BorrowMultipleBookResponse{}, err
+		}
+
+		results = append(results, dtos.BorrowBookResponse{
+			BookID:     updatedBook.BookID,
+			Title:      updatedBook.Title,
+			UserID:     user.UserID,
+			Username:   user.Username,
+			BorrowedAt: createdBorrowing.BorrowedAt,
+		})
+	}
+
+	return dtos.BorrowMultipleBookResponse{Borrowed: results}, nil
+}
+
 
 func (s *bookService) SetBookReturned(ctx context.Context, bookID string) (dtos.SetBookReturnedResponse, error) {
 	mu.Lock()
@@ -363,6 +461,50 @@ func (s *bookService) SetBookReturned(ctx context.Context, bookID string) (dtos.
 		BorrowingID: updatedBorrowing.BorrowingID,
 		ReturnedAt:  *updatedBorrowing.ReturnedAt,
 	}, nil
+}
+
+func (s *bookService) SetMultipleBookReturned(ctx context.Context, req dtos.SetMultipleReturnedRequest) (dtos.SetMultipleReturnedResponse, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	var results []dtos.SetBookReturnedResponse
+	now := time.Now()
+
+	for _, bookID := range req.BookIDs {
+		book, err := s.bookRepo.FindByID(ctx, bookID)
+		if err != nil {
+			return dtos.SetMultipleReturnedResponse{}, errors.New("book not found: " + bookID)
+		}
+		if book.Status == constants.STATUS_AVAILABLE {
+			return dtos.SetMultipleReturnedResponse{}, errors.New("book already available: " + bookID)
+		}
+
+		borrowing, err := s.borrowingRepo.FindCurrentlyByBookID(ctx, bookID)
+		if err != nil {
+			return dtos.SetMultipleReturnedResponse{}, err
+		}
+
+		borrowing.ReturnedAt = &now
+		updatedBorrowing, err := s.borrowingRepo.Update(ctx, nil, borrowing)
+		if err != nil {
+			return dtos.SetMultipleReturnedResponse{}, err
+		}
+
+		book.Status = constants.STATUS_AVAILABLE
+		book.UpdatedAt = now
+		updatedBook, err := s.bookRepo.Update(ctx, nil, book)
+		if err != nil {
+			return dtos.SetMultipleReturnedResponse{}, err
+		}
+
+		results = append(results, dtos.SetBookReturnedResponse{
+			BookID:      updatedBook.BookID,
+			BorrowingID: updatedBorrowing.BorrowingID,
+			ReturnedAt:  *updatedBorrowing.ReturnedAt,
+		})
+	}
+
+	return dtos.SetMultipleReturnedResponse{Returned: results}, nil
 }
 
 func (s *bookService) Delete(ctx context.Context, bookID string) error {

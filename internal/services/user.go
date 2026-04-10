@@ -24,7 +24,7 @@ type (
 		Register(ctx context.Context, req dtos.UserRegisterRequest) (dtos.UserRegisterResponse, error)
 		RegisterAdmin(ctx context.Context, req dtos.AdminRegisterRequest) (dtos.UserRegisterResponse, error)
 		Login(ctx context.Context, req dtos.UserLoginRequest) (dtos.UserLoginResponse, error)
-		UploadProfilePicture(ctx context.Context, req dtos.UploadProfilePictureRequest) (dtos.UpdateProfilePictureResponse, error)
+		UploadProfilePicture(ctx context.Context, req dtos.UploadProfilePictureRequest, userId string) (dtos.UpdateProfilePictureResponse, error)
 	}
 
 	userService struct {
@@ -99,12 +99,12 @@ func (s *userService) Register(ctx context.Context, req dtos.UserRegisterRequest
 	}, nil
 }
 
-func (s *userService) UploadProfilePicture(ctx context.Context, req dtos.UploadProfilePictureRequest) (dtos.UpdateProfilePictureResponse, error) {
+func (s *userService) UploadProfilePicture(ctx context.Context, req dtos.UploadProfilePictureRequest, userId string) (dtos.UpdateProfilePictureResponse, error) {
 	if req.ProfilePicture == nil {
 		return dtos.UpdateProfilePictureResponse{}, errors.New("profile picture is required")
 	}
 
-	user, err := s.userRepo.FindByID(ctx, req.UserID)
+	user, err := s.userRepo.FindByID(ctx, userId)
 	if err != nil {
 		return dtos.UpdateProfilePictureResponse{}, err
 	}
@@ -123,7 +123,6 @@ func (s *userService) UploadProfilePicture(ctx context.Context, req dtos.UploadP
 	}
 
 	return dtos.UpdateProfilePictureResponse{
-		UserID:         updatedUser.UserID,
 		ProfilePicture: base64.StdEncoding.EncodeToString(updatedUser.ProfilePicture),
 	}, nil
 }

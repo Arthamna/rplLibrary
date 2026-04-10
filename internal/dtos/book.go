@@ -27,9 +27,19 @@ type BookUpdateRequest struct {
 
 type BorrowBookRequest struct {
 	BookID string `json:"book_id" binding:"required"`
-	UserID string `json:"user_id" binding:"required"`
 }
 
+type BorrowMultipleBookRequest struct {
+	BookIDs []string `json:"book_ids" binding:"required,min=1"`
+}
+
+type SetBookReturnedRequest struct {
+	BookID string `json:"book_id" binding:"required"`
+}
+
+type SetMultipleReturnedRequest struct {
+	BookIDs []string `json:"book_ids" binding:"required,min=1"`
+}
 
 //
 
@@ -41,10 +51,18 @@ type BorrowBookResponse struct {
 	BorrowedAt time.Time `json:"borrowed_at"`
 }
 
+type BorrowMultipleBookResponse struct {
+	Borrowed []BorrowBookResponse `json:"borrowed"`
+}
+
 type SetBookReturnedResponse struct {
 	BookID     string    `json:"book_id"`
 	BorrowingID     string    `json:"borrowing_id"`
 	ReturnedAt time.Time `json:"returned_at"`
+}
+
+type SetMultipleReturnedResponse struct {
+	Returned []SetBookReturnedResponse `json:"returned"`
 }
 
 type BookResponse struct {

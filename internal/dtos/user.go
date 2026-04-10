@@ -9,27 +9,24 @@ import (
 )
 
 type UserRegisterRequest struct {
-	Username       string                `json:"username" binding:"required"`
-	Email          string                `json:"email" binding:"required,email"`
-	Password       string                `json:"password" binding:"required,min=6"`
+	Username string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
 }
 
 type UploadProfilePictureRequest struct {
-	UserID         string                `form:"user_id" binding:"required"`
 	ProfilePicture *multipart.FileHeader `form:"profile_picture" binding:"required"`
-}
-
-type UserUpdateRequest struct {
-	Username string `json:"username" binding:""`
-	Email    string `json:"email" binding:"email"`
-	Password string `json:"password" binding:""`
 }
 
 type UserLoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
-
+type UserUpdateRequest struct {
+	Username string `json:"username" binding:""`
+	Email    string `json:"email" binding:"email"`
+	Password string `json:"password" binding:""`
+}
 
 type UserRegisterResponse struct {
 	User  UserResponse `json:"user"`
@@ -37,7 +34,7 @@ type UserRegisterResponse struct {
 }
 
 type UserLoginResponse struct {
-	Token string       `json:"token"`
+	Token string `json:"token"`
 	Role  string `json:"role"`
 }
 
@@ -52,8 +49,7 @@ type UserResponse struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
-type UpdateProfilePictureResponse struct{
-	UserID string `json:"user_id"`
+type UpdateProfilePictureResponse struct {
 	ProfilePicture string `json:"profile_picture"`
 }
 
@@ -84,8 +80,8 @@ func ToUserResponseList(users []models.User) []*UserResponse {
 }
 
 type AdminRegisterRequest struct {
-	Username    string `json:"username" binding:"required"`
-	Email       string `json:"email" binding:"required,email"`
-	Password    string `json:"password" binding:"required,min=6"` 
-	SecretKey   string `json:"secret_key" binding:"required"`
+	Username  string `json:"username" binding:"required"`
+	Email     string `json:"email" binding:"required,email"`
+	Password  string `json:"password" binding:"required,min=6"`
+	SecretKey string `json:"secret_key" binding:"required"`
 }

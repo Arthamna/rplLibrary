@@ -13,6 +13,8 @@ type (
 		CreateBook(c *gin.Context)
 		UploadBookPicture(c *gin.Context)
 		GetAllBooks(c *gin.Context)
+		BorrowMultipleBook(c *gin.Context)
+		SetMultipleReturnedBook(c *gin.Context)
 		GetBook(c *gin.Context)
 		UpdateBook(c *gin.Context)
 		DeleteBook(c *gin.Context)
@@ -20,6 +22,7 @@ type (
 		SetReturnedBook(c *gin.Context)
 		FindByCategory(c *gin.Context)
 		FindByStatus(c *gin.Context)
+		SearchBooks(c *gin.Context)
 	}
 
 	bookHandler struct {
@@ -51,7 +54,7 @@ func (h *bookHandler) CreateBook(c *gin.Context) {
 
 func (h *bookHandler) UploadBookPicture(c *gin.Context) {
 	var req dtos.UploadBookPictureRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -103,7 +106,7 @@ func (h *bookHandler) UpdateBook(c *gin.Context) {
 }
 
 func (h *bookHandler) DeleteBook(c *gin.Context) {
-	bookID := c.Param("bookID")
+	bookID := c.Param("id")
 
 	err := h.bookService.Delete(c.Request.Context(), bookID)
 	if err != nil {
@@ -116,12 +119,13 @@ func (h *bookHandler) DeleteBook(c *gin.Context) {
 
 func (h *bookHandler) BorrowBook(c *gin.Context) {
 	var req dtos.BorrowBookRequest
+	userId := c.MustGet("user_id").(string)
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	book, err := h.bookService.BorrowBook(c.Request.Context(), req)
+	book, err := h.bookService.BorrowBook(c.Request.Context(), req, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -130,9 +134,48 @@ func (h *bookHandler) BorrowBook(c *gin.Context) {
 	c.JSON(http.StatusOK, book)
 }
 
+
+func (h *bookHandler) BorrowMultipleBook(c *gin.Context) {
+	var req dtos.BorrowMultipleBookRequest
+	userId := c.MustGet("user_id").(string)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := h.bookService.BorrowMultipleBook(c.Request.Context(), req, userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+func (h *bookHandler) SetMultipleReturnedBook(c *gin.Context) {
+	var req dtos.SetMultipleReturnedRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := h.bookService.SetMultipleBookReturned(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
 func (h *bookHandler) SetReturnedBook(c *gin.Context) {
-	bookID := c.Param("bookID")
-	book, err := h.bookService.SetBookReturned(c.Request.Context(), bookID)
+	var req dtos.SetBookReturnedRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	book, err := h.bookService.SetBookReturned(c.Request.Context(), req.BookID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -163,4 +206,20 @@ func (h *bookHandler) FindByStatus(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, book)
+}
+
+func (h *bookHandler) SearchBooks(c *gin.Context) {
+    query := c.Query("q")
+    if query == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "query parameter 'q' is required"})
+        return
+    }
+
+    books, err := h.bookService.SearchByTitle(c.Request.Context(), query)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, books)
 }

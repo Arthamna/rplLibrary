@@ -12,7 +12,9 @@ type BookRepository interface {
 	Create(ctx context.Context, tx *gorm.DB, book *models.Book) (*models.Book, error)
 	FindAll(ctx context.Context) ([]models.Book, error)
 	FindByID(ctx context.Context, id string) (*models.Book, error)
+	FindByTitle(ctx context.Context, query string) ([]models.Book, error)
 	Update(ctx context.Context, tx *gorm.DB, book *models.Book) (*models.Book, error)
+	UpdatePicture(ctx context.Context, tx *gorm.DB, book *models.Book) (*models.Book, error)
 	Delete(ctx context.Context, tx *gorm.DB, id string) error
 	FindByCategory(ctx context.Context, categoryName string) ([]models.Book, error)
 	FindByStatus(ctx context.Context, status string) ([]models.Book, error)
@@ -68,9 +70,32 @@ func (r *bookRepository) FindByID(ctx context.Context, id string) (*models.Book,
 	return &book, nil
 }
 
+func (r *bookRepository) FindByTitle(ctx context.Context, query string) ([]models.Book, error) {
+    var books []models.Book
+    err := r.db.WithContext(ctx).
+        Preload("Categories").
+        Where("LOWER(title) LIKE LOWER(?)", "%"+query+"%").
+        Find(&books).Error
+    if err != nil {
+        return nil, err
+    }
+    return books, nil
+}
+
 func (r *bookRepository) Update(ctx context.Context, tx *gorm.DB, book *models.Book) (*models.Book, error) {
 	db := r.dbOrTx(tx)
 	if err := db.WithContext(ctx).Save(book).Error; err != nil {
+		return nil, err
+	}
+	return book, nil
+}
+
+func (r *bookRepository) UpdatePicture(ctx context.Context, tx *gorm.DB, book *models.Book) (*models.Book, error) {
+	db := r.dbOrTx(tx)
+	if err := db.WithContext(ctx).	
+	Model(&models.Book{}).
+	Where("book_id = ?", book.BookID).
+	Update("book_picture", book.BookPicture).Error; err != nil {
 		return nil, err
 	}
 	return book, nil
@@ -88,7 +113,7 @@ func (r *bookRepository) FindByCategory(ctx context.Context, categoryName string
 		Distinct("books.*").
 		Joins("JOIN book_categories bc ON bc.book_id = books.book_id").
 		Joins("JOIN categories c ON c.category_id = bc.category_id").
-		Where("c.name = ? AND c.deleted_at IS NULL", categoryName).
+		Where("LOWER(c.name) = LOWER(?) AND c.deleted_at IS NULL", categoryName).
 		Find(&books).Error
 
 	if err != nil {

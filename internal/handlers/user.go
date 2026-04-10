@@ -45,12 +45,13 @@ func (h *userHandler) Register(c *gin.Context) {
 
 func (h *userHandler) UploadPicture(c *gin.Context) {
 	var req dtos.UploadProfilePictureRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	userId := c.MustGet("user_id").(string)
+	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user, err := h.userService.UploadProfilePicture(c.Request.Context(), req)
+	user, err := h.userService.UploadProfilePicture(c.Request.Context(), req, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

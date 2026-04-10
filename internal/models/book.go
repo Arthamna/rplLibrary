@@ -15,6 +15,7 @@ type Book struct {
 	CreatedAt   time.Time      `gorm:"column:created_at"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at"`
-	Categories []Category `gorm:"many2many:book_categories;"`
+	
+	Categories []Category `gorm:"many2many:book_categories;joinForeignKey:BookID;JoinReferences:CategoryID"`
 	Borrowings  []BookBorrowing `gorm:"foreignKey:BookID;references:BookID"`
 }
