@@ -33,7 +33,7 @@ docs:
     - **Method:** `POST`
     - **Path:** `/auth/login`
     - **Auth:** No
-    - **Description:** Login user and get token.
+    - **Description:** Login and get token.
 
     ### 3) Register Admin
     - **Method:** `POST`
@@ -53,69 +53,82 @@ docs:
     - **Auth:** Yes
     - **Description:** Upload user profile picture.
 
-    ### 5) Get All Categories
-    - **Method:** `GET`
-    - **Path:** `/api/categories`
-    - **Auth:** Yes
-    - **Description:** Get all categories.
-
     ---
 
     ## Books
 
-    > All routes below require `AuthMiddleware()`.
+    > All routes below are under `/api/books` and require `AuthMiddleware()`.
 
-    ### 6) Borrow Book
+    ### 5) Borrow Book
     - **Method:** `POST`
-    - **Path:** `/books/borrow`
+    - **Path:** `/api/books/borrow`
     - **Auth:** Yes
     - **Description:** Borrow a book.
 
-    ### 7) Find Books by Category
+    ### 6) Borrow Multiple Books
+    - **Method:** `POST`
+    - **Path:** `/api/books/borrows`
+    - **Auth:** Yes
+    - **Description:** Borrow multiple books at once.
+
+    ### 7) Find Books by Status
     - **Method:** `GET`
-    - **Path:** `/books/category/:category`
+    - **Path:** `/api/books/status/:status`
+    - **Auth:** Yes
+    - **Description:** Get books by status.
+    - **Path Params:**
+      - `status` : book status, for example `available` or `borrowed`
+
+    ### 8) Get All Categories
+    - **Method:** `GET`
+    - **Path:** `/api/books/categories`
+    - **Auth:** Yes
+    - **Description:** Get all categories for user access.
+
+    ### 9) Find Books by Category
+    - **Method:** `GET`
+    - **Path:** `/api/books/category/:category`
     - **Auth:** Yes
     - **Description:** Get books by category.
     - **Path Params:**
       - `category` : category name
 
-    ### 8) Find Books by Status
+    ### 10) Search Books
     - **Method:** `GET`
-    - **Path:** `/books/status/:status`
+    - **Path:** `/api/books/search`
     - **Auth:** Yes
-    - **Description:** Get books by status.
-    - **Path Params:**
-      - `status` : book status
+    - **Description:** Search books.
+    - **Query Params:**
+      - `q` : search keyword, for example `harry`
 
-    ### 8) Search Books by Query
-    - **Method:** `GET`
-    - **Path:** `/books/search`
-    - **Auth:** Yes
-    - **Description:** Get books by query.
-    - **Path Params:**
-      - `status` : book status
-      
     ---
 
     ## Admin
 
     > All routes below require both `AuthMiddleware()` and `AdminMiddleware()`.
 
-    ### 9) Create Book
+    ### 11) Set Multiple Books Returned
+    - **Method:** `POST`
+    - **Path:** `/admin/books/returned`
+    - **Auth:** Yes
+    - **Role:** Admin
+    - **Description:** Mark multiple borrowed books as returned.
+
+    ### 12) Create Book
     - **Method:** `POST`
     - **Path:** `/admin/book`
     - **Auth:** Yes
     - **Role:** Admin
     - **Description:** Create a new book.
 
-    ### 10) Get All Books
+    ### 13) Get All Books
     - **Method:** `GET`
-    - **Path:** `/admin/books`
+    - **Path:** `/admin/book`
     - **Auth:** Yes
     - **Role:** Admin
     - **Description:** Get all books.
 
-    ### 11) Get Book by ID
+    ### 14) Get Book by ID
     - **Method:** `GET`
     - **Path:** `/admin/book/:id`
     - **Auth:** Yes
@@ -124,7 +137,7 @@ docs:
     - **Path Params:**
       - `id` : book ID
 
-    ### 12) Update Book
+    ### 15) Update Book
     - **Method:** `PUT`
     - **Path:** `/admin/book/:id`
     - **Auth:** Yes
@@ -133,7 +146,7 @@ docs:
     - **Path Params:**
       - `id` : book ID
 
-    ### 13) Delete Book
+    ### 16) Delete Book
     - **Method:** `DELETE`
     - **Path:** `/admin/book/:id`
     - **Auth:** Yes
@@ -142,37 +155,35 @@ docs:
     - **Path Params:**
       - `id` : book ID
 
-    ### 14) Upload Book Picture
+    ### 17) Upload Book Cover
     - **Method:** `POST`
-    - **Path:** `/admin/books/profile`
+    - **Path:** `/admin/book/cover`
     - **Auth:** Yes
     - **Role:** Admin
     - **Description:** Upload book cover/profile picture.
 
-    ### 15) Set Book Returned
+    ### 18) Set Book Returned
     - **Method:** `POST`
-    - **Path:** `/admin/books/returned/:id`
+    - **Path:** `/admin/book/returned`
     - **Auth:** Yes
     - **Role:** Admin
-    - **Description:** Mark borrowed book as returned.
-    - **Path Params:**
-      - `id` : book ID
+    - **Description:** Mark a borrowed book as returned.
 
-    ### 16) Create Category
+    ### 19) Create Category
     - **Method:** `POST`
     - **Path:** `/admin/category`
     - **Auth:** Yes
     - **Role:** Admin
     - **Description:** Create a new category.
 
-    ### 17) Get All Categories
+    ### 20) Get All Categories
     - **Method:** `GET`
-    - **Path:** `/admin/categories`
+    - **Path:** `/admin/category`
     - **Auth:** Yes
     - **Role:** Admin
     - **Description:** Get all categories.
 
-    ### 18) Get Category by ID
+    ### 21) Get Category by ID
     - **Method:** `GET`
     - **Path:** `/admin/category/:id`
     - **Auth:** Yes
@@ -181,7 +192,7 @@ docs:
     - **Path Params:**
       - `id` : category ID
 
-    ### 19) Update Category
+    ### 22) Update Category
     - **Method:** `PUT`
     - **Path:** `/admin/category/:id`
     - **Auth:** Yes
@@ -190,7 +201,7 @@ docs:
     - **Path Params:**
       - `id` : category ID
 
-    ### 20) Delete Category
+    ### 23) Delete Category
     - **Method:** `DELETE`
     - **Path:** `/admin/category/:id`
     - **Auth:** Yes
@@ -202,8 +213,11 @@ docs:
     ## Notes
 
     - Use `Authorization: Bearer <token>` for protected routes.
-    - Routes under `/api`, `/books`, and `/admin` require authentication.
-    - Routes under `/admin` require admin access.
+    - Routes under `/api` require authentication.
+    - Routes under `/api/books` are for authenticated users.
+    - Routes under `/admin` require both authentication and admin access.
+    - The search endpoint uses query parameter `q`.
+    - The category filter uses the category name in the path parameter.
   type: text/markdown
 bundled: false
 extensions:

@@ -24,7 +24,7 @@ func SetupRoutes(r *gin.Engine, userController handlers.UserHandler, bookControl
 		api.POST("/profile", userController.UploadPicture)
 		
 		// kinda confused, but let's say user dan admin punya endpoint tersendiri untuk bisa mengakses categories 
-		// sehingga dapat melakukan filtering dengan lebih mudah
+		// sehingga user dapat melihat category, lalu juga mencari dan filtering dengan lebih mudah
 		books := api.Group("/books")
 		{
 			// borrow book
@@ -32,10 +32,14 @@ func SetupRoutes(r *gin.Engine, userController handlers.UserHandler, bookControl
 			books.POST("/borrows", bookController.BorrowMultipleBook)
 
 			// filtering
+
+			// status = available / borrowed
 			books.GET("/status/:status", bookController.FindByStatus)
+
 			// categories, untuk mencari buku berdasarkan kategori
 			books.GET("/categories", categoryController.GetAllCategories)
 			books.GET("/category/:category", bookController.FindByCategory)
+
 			// searching : /books/search?q=harry
 			books.GET("/search", bookController.SearchBooks)
 		}
@@ -46,27 +50,32 @@ func SetupRoutes(r *gin.Engine, userController handlers.UserHandler, bookControl
 	admin := r.Group("/admin")
 	admin.Use(middleware.AuthMiddleware(), middleware.AdminMiddleware())
 	{
-		// books
-		// crud
-		admin.POST("/book", bookController.CreateBook)
-		admin.GET("/books", bookController.GetAllBooks)
-		admin.GET("/book/:id", bookController.GetBook)
-		admin.PUT("/book/:id", bookController.UpdateBook)
-		admin.DELETE("/book/:id", bookController.DeleteBook)
+		// book
+		books := admin.Group("/books")
+		{
+			books.POST("/returned", bookController.SetMultipleReturnedBook)
+		}
+		
+		book := admin.Group("/book")
+		{
+			book.POST("", bookController.CreateBook)
+			book.GET("", bookController.GetAllBooks)
+			book.GET("/:id", bookController.GetBook)
+			book.PUT("/:id", bookController.UpdateBook)
+			book.DELETE("/:id", bookController.DeleteBook)
 
-		// uplod
-		admin.POST("/book/cover", bookController.UploadBookPicture)
-		// update book returned
-		admin.POST("/book/returned", bookController.SetReturnedBook)
-		admin.POST("/books/returned", bookController.SetMultipleReturnedBook)
+			book.POST("/cover", bookController.UploadBookPicture)
+			book.POST("/returned", bookController.SetReturnedBook)
+		}
 
-		// Category
-		// crud
-		admin.POST("/category", categoryController.CreateCategory)
-		admin.GET("/categories", categoryController.GetAllCategories)
-		admin.GET("/category/:id", categoryController.GetCategory)
-		admin.PUT("/category/:id", categoryController.UpdateCategory)
-		admin.DELETE("/category/:id", categoryController.DeleteCategory)
-
+		// category
+		category := admin.Group("/category")
+		{
+			category.POST("", categoryController.CreateCategory)
+			category.GET("", categoryController.GetAllCategories)
+			category.GET("/:id", categoryController.GetCategory)
+			category.PUT("/:id", categoryController.UpdateCategory)
+			category.DELETE("/:id", categoryController.DeleteCategory)
+		}
 	}
 }

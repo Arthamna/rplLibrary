@@ -5,10 +5,10 @@ info:
 
 http:
   method: GET
-  url: http://localhost:8080/admin/books
+  url: http://localhost:8080/admin/book
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZDY2N2JkZTAtODcwZS00ZjhjLTkzOGYtYzZmZGYwMDZjYmVhIiwicm9sZSI6InVzZXIiLCJpc3MiOiJycExpYnJhcnkiLCJleHAiOjE3NzU3NTg2MjIsImlhdCI6MTc3NTc1MTQyMn0.RuvviJ6Z7qFHqF57FNBH9BsbsXVoxv-4SKP9rOq9YuU
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZDY2N2JkZTAtODcwZS00ZjhjLTkzOGYtYzZmZGYwMDZjYmVhIiwicm9sZSI6InVzZXIiLCJpc3MiOiJycExpYnJhcnkiLCJleHAiOjE3NzU4MDkyMjcsImlhdCI6MTc3NTgwMjAyN30.VBAfF9Q9dNc7cCwIOYpLi3lu3kRBtKi6Mm3JQ31r7VM
 
 settings:
   encodeUrl: true
@@ -19,7 +19,7 @@ settings:
 examples:
   - name: Success
     request:
-      url: http://localhost:8080/admin/books
+      url: http://localhost:8080/admin/book
       method: GET
     response:
       status: 200
@@ -28,36 +28,142 @@ examples:
         - name: content-type
           value: application/json; charset=utf-8
         - name: date
-          value: Thu, 09 Apr 2026 16:51:26 GMT
-        - name: content-length
-          value: "794"
+          value: Fri, 10 Apr 2026 06:23:50 GMT
+        - name: transfer-encoding
+          value: chunked
       body:
         type: json
         data: |-
           [
             {
               "book_id": "BOK-001",
-              "author": "Robert C. Martin",
-              "title": "Clean Code",
-              "description": "Panduan menulis kode yang rapi dan mudah dipelihara",
+              "author": "Robert Cecil Martin",
+              "title": "Clean Code Revised",
+              "description": "Panduan menulis kode yang lebih rapi dan maintainable revisi",
               "status": "",
               "category_ids": [
-                "CAT-001"
+                "CAT-003"
               ],
               "created_at": "2026-04-09T21:52:19.219667+07:00",
-              "updated_at": "2026-04-09T21:52:19.219667+07:00"
+              "updated_at": "2026-04-10T00:22:09.095975+07:00"
             },
             {
-              "book_id": "BOK-002",
-              "author": "James Clear",
-              "title": "Atomic Habits",
-              "description": "Buku tentang kebiasaan kecil yang berdampak besar",
+              "book_id": "BOK-004",
+              "author": "George Orwell",
+              "title": "1984",
+              "description": "Novel distopia tentang pengawasan total",
               "status": "",
               "category_ids": [
-                "CAT-002"
+                "CAT-007",
+                "CAT-007",
+                "CAT-010",
+                "CAT-010"
               ],
-              "created_at": "2026-04-09T21:52:19.219667+07:00",
-              "updated_at": "2026-04-09T21:52:19.219667+07:00"
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:04:08.259693+07:00"
+            },
+            {
+              "book_id": "BOK-005",
+              "author": "J.K. Rowling",
+              "title": "Harry Potter",
+              "description": "Petualangan penyihir muda di Hogwarts",
+              "status": "",
+              "category_ids": [
+                "CAT-006",
+                "CAT-006",
+                "CAT-007",
+                "CAT-007"
+              ],
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:04:08.259693+07:00"
+            },
+            {
+              "book_id": "BOK-011",
+              "author": "Malcolm Gladwell",
+              "title": "Outliers",
+              "description": "Buku tentang faktor kesuksesan luar biasa",
+              "status": "",
+              "category_ids": [
+                "CAT-005",
+                "CAT-005",
+                "CAT-009",
+                "CAT-009"
+              ],
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:04:08.259693+07:00"
+            },
+            {
+              "book_id": "BOK-013",
+              "author": "Stephen King",
+              "title": "The Shining",
+              "description": "Novel horor klasik di hotel terpencil",
+              "status": "",
+              "category_ids": [
+                "CAT-006",
+                "CAT-006",
+                "CAT-007",
+                "CAT-007"
+              ],
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:04:08.259693+07:00"
+            },
+            {
+              "book_id": "83cf883b-a194-496c-a45a-89bdea6a884d",
+              "author": "Frank Herbert",
+              "title": "Dune Messiah",
+              "description": "Sekuel dari Dune yang melanjutkan kisah Paul Atreides",
+              "status": "",
+              "category_ids": [
+                "CAT-007",
+                "CAT-010"
+              ],
+              "created_at": "2026-04-10T11:08:06.573445+07:00",
+              "updated_at": "2026-04-10T11:08:06.590225+07:00"
+            },
+            {
+              "book_id": "BOK-006",
+              "author": "Yuval Noah Harari",
+              "title": "Sapiens",
+              "description": "Sejarah singkat umat manusia",
+              "status": "",
+              "category_ids": [
+                "CAT-008",
+                "CAT-008",
+                "CAT-010",
+                "CAT-010"
+              ],
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:04:08.259693+07:00"
+            },
+            {
+              "book_id": "BOK-008",
+              "author": "Neil Gaiman",
+              "title": "Coraline",
+              "description": "Cerita fantasi gelap penuh misteri",
+              "status": "",
+              "category_ids": [
+                "CAT-006",
+                "CAT-006",
+                "CAT-007",
+                "CAT-007"
+              ],
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:04:08.259693+07:00"
+            },
+            {
+              "book_id": "BOK-009",
+              "author": "Toni Morrison",
+              "title": "Beloved",
+              "description": "Novel tentang trauma dan kenangan masa lalu",
+              "status": "",
+              "category_ids": [
+                "CAT-007",
+                "CAT-007",
+                "CAT-009",
+                "CAT-009"
+              ],
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:04:08.259693+07:00"
             },
             {
               "book_id": "BOK-003",
@@ -67,15 +173,102 @@ examples:
               "status": "",
               "category_ids": [
                 "CAT-001",
+                "CAT-001",
+                "CAT-001",
+                "CAT-001",
+                "CAT-003",
+                "CAT-003",
+                "CAT-003",
                 "CAT-003"
               ],
               "created_at": "2026-04-09T21:52:19.219667+07:00",
-              "updated_at": "2026-04-09T21:52:19.219667+07:00"
+              "updated_at": "2026-04-10T11:15:02.287918+07:00"
+            },
+            {
+              "book_id": "BOK-007",
+              "author": "Paulo Coelho",
+              "title": "The Alchemist",
+              "description": "Kisah perjalanan mencari makna hidup",
+              "status": "",
+              "category_ids": [
+                "CAT-005",
+                "CAT-005",
+                "CAT-005",
+                "CAT-005",
+                "CAT-005",
+                "CAT-005",
+                "CAT-005",
+                "CAT-005",
+                "CAT-008",
+                "CAT-008",
+                "CAT-008",
+                "CAT-008",
+                "CAT-008",
+                "CAT-008",
+                "CAT-008",
+                "CAT-008"
+              ],
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:16:14.508056+07:00"
+            },
+            {
+              "book_id": "BOK-010",
+              "author": "Dan Brown",
+              "title": "The Da Vinci Code",
+              "description": "Thriller misteri dengan teka-teki sejarah",
+              "status": "",
+              "category_ids": [
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-010",
+                "CAT-010",
+                "CAT-010",
+                "CAT-010",
+                "CAT-010",
+                "CAT-010",
+                "CAT-010",
+                "CAT-010"
+              ],
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:16:14.516205+07:00"
+            },
+            {
+              "book_id": "BOK-012",
+              "author": "Hanya Yanagihara",
+              "title": "A Little Life",
+              "description": "Kisah persahabatan dan luka batin",
+              "status": "",
+              "category_ids": [
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-007",
+                "CAT-009",
+                "CAT-009",
+                "CAT-009",
+                "CAT-009",
+                "CAT-009",
+                "CAT-009",
+                "CAT-009",
+                "CAT-009"
+              ],
+              "created_at": "2026-04-10T11:04:08.259693+07:00",
+              "updated_at": "2026-04-10T11:16:14.523592+07:00"
             }
           ]
-  - name: Unathorized
+  - name: Unauthorized
     request:
-      url: http://localhost:8080/admin/books
+      url: http://localhost:8080/admin/book
       method: GET
     response:
       status: 403
@@ -84,7 +277,7 @@ examples:
         - name: content-type
           value: application/json; charset=utf-8
         - name: date
-          value: Thu, 09 Apr 2026 16:52:11 GMT
+          value: Fri, 10 Apr 2026 06:24:27 GMT
         - name: content-length
           value: "33"
       body:
