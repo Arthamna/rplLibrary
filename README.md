@@ -24,25 +24,33 @@ RPLLibrary adalah.. API untuk perpustakaan, dikembangkan dengan Go.
 - Kena penyakit go gila 
 
 ### Alasan Memakai Layered Architecture
-- Mudah dikembangkan untuk tahapan awal
+- Mudah dikembangkan 
+-  tahapan awal
 
 ### Skema Database
 ![](./docs/imgs/erd.png)
 
 ### Cara Penggunaan
 - Setup database menggunakan `env.example`, bisa lewat Docker Compose atau pgAdmin.
-- Buat database terlebih dahulu sebelum menjalankan fungsi `main`.
-- Sekaligus atur konfigurasi pada `env.example`.
+- Buat database terlebih dahulu (bisa lewat script yang ada di `./pkg/database/script` ) untuk melakukan seeding.
+- Jalankan dengan : `go run ./cmd/main.go`
 
 ### Analisis
-- **Keamanan**: untuk password sudah menggunakan `bcrypt` dengan hash dan salt.
+- **Keamanan**: 
+  - Password : sudah menggunakan `bcrypt` dengan hash dan salt.
 
 ```go
   bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 ```
 
+  - SQL Injection : menggunakan gorm dengan built-in placeholder sehingga query dijadikan sebagai string, bukan command sql langsung
+
   - **Upload gambar**: endpoint untuk upload gambar dipisahkan agar lebih rapi dan terstruktur (w mas Azka).
-  - **Transaksi data**: memakai `transaction` pada mutasi data (create, update, dan delete) untuk menjaga konsistensi data.
+
+
+  - **Transaksi data**: memakai `transaction` pada proses mutasi data (create, update, dan delete) untuk menjaga konsistensi data.
+
+  - **Concurrency** : memakai mutual exclusion pada proses mutasi data untuk mencegah race condition 
 
 #### Fitur Filtering
   - List semua kategori 
@@ -80,7 +88,6 @@ RPLLibrary is.. API for Library. Developed with Go.
 ### Why Go
 
   - Because Go is fun to use (i guess)
-  - It is commonly used
 
 ### Why Layered Architecture
 
@@ -97,12 +104,19 @@ RPLLibrary is.. API for Library. Developed with Go.
 
 ### Analysis
 
-  - **Security**: passwords are handled using `bcrypt` with hashing and salt.
+  - **Security**: 
+    - Passwords : Handled using `bcrypt` with hashing and salt.
     ```go
     bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
     ```
+
+    - SQL Injection: GORM is used with built-in placeholders, so user input is treated as a bound string value rather than a direct SQL command.
+
   - **Image upload**: the image upload endpoint is separated to keep the API structure cleaner. (w mas Azka)
+
   - **Data mutation**: `transaction` is used for data mutations such as create, update, and delete to maintain consistency.
+
+  - **Concurrency**: mutual exclusion is used during data mutation processes to prevent race conditions.
 
 #### Filtering Features
 - Get all category

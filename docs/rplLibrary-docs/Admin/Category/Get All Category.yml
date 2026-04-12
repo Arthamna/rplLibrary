@@ -5,10 +5,10 @@ info:
 
 http:
   method: GET
-  url: http://localhost:8080/admin/categories
+  url: http://localhost:8080/admin/category
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZDY2N2JkZTAtODcwZS00ZjhjLTkzOGYtYzZmZGYwMDZjYmVhIiwicm9sZSI6InVzZXIiLCJpc3MiOiJycExpYnJhcnkiLCJleHAiOjE3NzU3NTg2MjIsImlhdCI6MTc3NTc1MTQyMn0.RuvviJ6Z7qFHqF57FNBH9BsbsXVoxv-4SKP9rOq9YuU
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzgwNmQ5OGYtYmM2Yy00N2VjLWJjMTMtNGJiMDQ3NTc1NDQwIiwicm9sZSI6ImFkbWluIiwiaXNzIjoicnBMaWJyYXJ5IiwiZXhwIjoxNzc2MDA0MDY2LCJpYXQiOjE3NzU5OTY4NjZ9.Mr4al7JlrCqXLTXHqcssVL8n0dczBNTFTQzQPA4pNww
 
 settings:
   encodeUrl: true

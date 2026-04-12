@@ -45,8 +45,6 @@ VALUES
 INSERT INTO categories (category_id, name)
 VALUES
 ('CAT-004', 'Technology'),
-('CAT-005', 'Productivity'),
-('CAT-006', 'Fantasy'),
 ('CAT-007', 'Fiction'),
 ('CAT-008', 'Philosophy'),
 ('CAT-009', 'Psychology'),
